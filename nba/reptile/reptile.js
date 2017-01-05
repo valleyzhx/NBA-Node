@@ -65,12 +65,15 @@ function getVideoList(title,href,callback) {
 			}
 			$('#con_vdjs_1 ul li a').each(function (idx, element) {
 				var $element = $(element);
-				var func = 'var url = ' + $element.attr('onclick')
-				eval(func);
-				detailItems.push({
-					title:$element.attr('title'),
-					video:url
-				});
+				var title = $element.attr('title');
+				if (title) {
+					var func = 'var url = ' + $element.attr('onclick')
+					eval(func);
+					detailItems.push({
+						title:$element.attr('title'),
+						video:url
+					});
+				}
 				length--;
 				if (length === 0) {
 					callback(detailItems);
@@ -84,6 +87,11 @@ function appAction(page) {
 	var html = page==1?'index':page;
   var url = 'http://www.24zbw.com/lqsp/nbasp/'+html+'.html';
   // url = 'http://www.24zbw.com/lqsp/nbasp/11-9593.html';
+	var d=new Date()
+	var month = d.getMonth();
+	var year = d.getFullYear();
+
+
   superagent.get(url)
     .end(function (err, sres) {
       // 常规的错误处理
@@ -105,6 +113,14 @@ function appAction(page) {
         var href = $element.attr('href');
 				var html = href.split("/").pop();
 				var videoId = html.split('.').shift();
+				var time = videoId.split('-').shift();
+				var videoYear = year;
+				if (time <= 1 && month >= 11) { // 16-12-31，请求到国内1月份的数据，year = 2017
+					videoYear = year+1;
+				}else if (time >= 11 && month <= 1) { // 17-1-1 访问到12月数据， year = 2016
+					videoYear = year-1;
+				}
+				videoId = videoYear+'-'+videoId;
         getVideoList(title,href,function (detailItems) {
           var videoItem = new VideoItem({
             videoId:videoId,
