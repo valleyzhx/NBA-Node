@@ -1,5 +1,8 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  p Welcome to nba
+
+  - for (var x = 0; x < videoList.length; x++){
+    li= videoList[x].title
+  -}
